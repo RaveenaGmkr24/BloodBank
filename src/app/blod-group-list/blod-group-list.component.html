@@ -1,0 +1,92 @@
+<div class="mat-elevation-z2" style="margin: 20px;">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+        <!-- Id Column -->
+        <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> Id. </th>
+            <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+        </ng-container>
+
+        <!-- Blood Group Column -->
+        <ng-container matColumnDef="bloodGroupName">
+            <th mat-header-cell *matHeaderCellDef> Blood Group Name </th>
+            <td mat-cell *matCellDef="let element"> {{element.bloodGroupName}} </td>
+        </ng-container>
+
+        <!-- Count Column -->
+        <ng-container matColumnDef="count">
+            <th mat-header-cell *matHeaderCellDef> Count </th>
+            <td mat-cell *matCellDef="let element"> {{element.count}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Action</th>
+            <td mat-cell *matCellDef="let myRowData">
+                <mat-icon matTooltip="Edit Count" (click)="getRecord(myRowData)">edit</mat-icon>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    </table>
+    <div align="end" style="padding: 20px;">
+        <button mat-flat-button color="primary" (click)="requestBlood()"> Request Blood </button>
+    </div>
+</div>
+
+<!-- Dialog template -->
+<ng-template #EditCount style="max-width: 200px;">
+    <div>
+        <h2 matDialogTitle>Edit Count <mat-icon matTooltip="Close" style="float: right;margin-top:22px"
+                matDialogClose>close</mat-icon>
+        </h2>
+    </div>
+    <mat-dialog-content>
+        <mat-form-field class="example-full-width">
+            <mat-label>Enter count</mat-label>
+            <input matInput placeholder="Ex. 1,2" [formControl]="countValue">
+        </mat-form-field>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-flat-button color="primary" (click)="editCount()"> Save </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<ng-template #RequestBloodDialog style="max-width: 250px;">
+    <div>
+        <h2 matDialogTitle>Request Blood Group <mat-icon style="float: right;margin-top:22px" matTooltip="Close"
+                matDialogClose>close</mat-icon>
+        </h2>
+    </div>
+    <mat-dialog-content>
+        <form [formGroup]="requiredBlood">
+            <mat-form-field class="example-full-width">
+                <mat-label>Select Blood Group Needed</mat-label>
+                <mat-select [formControlName]="'requiredBloodGroup'" (selectionChange)='selectionChange($event)'>
+                    <mat-option *ngFor="let item of dataSource" [value]="item.id">
+                        {{item.bloodGroupName}}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="requiredBlood?.get('requiredBloodGroup')?.hasError('required')">
+                    This field is Required!
+                </mat-error>
+            </mat-form-field><br>
+            <mat-form-field *ngIf="isCountAvailable && requiredCountArray.length" class="example-full-width">
+                <mat-label>Count u needed</mat-label>
+                <mat-select [formControlName]="'requiredBloodGroupCount'">
+                    <mat-option *ngFor="let item of requiredCountArray" [value]="item">
+                        {{item}}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="requiredBlood?.get('requiredBloodGroupCount')?.hasError('required')">
+                    This field is Required!
+                </mat-error>
+            </mat-form-field>
+            <p *ngIf="!isCountAvailable" style="color: red;">No stock</p>
+        </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-flat-button color="primary" matDialogClose> Cancel </button>
+        <button *ngIf="isCountAvailable && requiredCountArray.length" mat-flat-button color="primary" [disabled]="requiredBlood.invalid" (click)="saveRequestBlood()"> Save </button>
+    </mat-dialog-actions>
+</ng-template>
